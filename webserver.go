@@ -1,6 +1,7 @@
 package main
 
 import (
+  "go-simple-calculator"
   "flag"
 	"fmt"
 	"html/template"
@@ -22,18 +23,18 @@ func (*apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
-	// greet the user
-	fmt.Fprintf(w, "Hello %s!\n", number)
 }
 
 func htmlHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := `
     <form method="post">
   		<input name="number" value="{{ .Number }}" required>
-      <input type="submit" value="Greet!">
+      <input type="submit" value="Calculate!">
 		</form>
-		{{ if .Number }}<h1>Hello {{ .Number }}!</h1>{{ end }}`
+		{{ if .Number }}
+      <h2>Result:</h2>
+      <h3>{{ .Number }} = {{ .Result }}</h3>
+    {{ end }}`
 
 	// set the encoding
 	w.Header().Add("Content-type", "text/html")
@@ -47,8 +48,10 @@ func htmlHandler(w http.ResponseWriter, r *http.Request) {
 	// prepare the data
 	data := struct {
 		Number string
+    Result string
 	}{
 		Number: r.FormValue("number"),
+    Result : calc.ChangeStringtoArray(r.FormValue("number")),
 	}
 
 	// parse the template
